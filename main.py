@@ -7,11 +7,13 @@ from pyairmore.services.messaging import MessagingService
 from pyairmore.data.messaging import MessageType  # TODO update this in the documentation
 from enum import Enum
 
+
 class Roles(Enum):
-    USER=1
-    APPROVER=2
-    UNREGISTERED=3
-    UNDEFINED=4
+    USER = 1
+    APPROVER = 2
+    UNREGISTERED = 3
+    UNDEFINED = 4
+
 
 approval_template = "SMS BROADCAST REQUESTED, return Y/yes to authorise transmission. \
 The message contents follow the colon:{}"
@@ -31,8 +33,6 @@ def get_number_role(num_string, json_data):
         role = Roles.UNREGISTERED
 
     return role
-
-
 
 
 def run(config_file_path, gw_handset_ip):
@@ -72,7 +72,7 @@ def run(config_file_path, gw_handset_ip):
 
     run = True
     awaiting_approval = False
-    while(run):
+    while (run):
         # Keep checking for new SMSes
         all_messages = messasging_service.fetch_message_history()
         # Retrieved X messages
@@ -94,19 +94,17 @@ def run(config_file_path, gw_handset_ip):
             # process the new message by checking if the sender is already in one of the lists
             role = get_number_role(msg.phone, config_data)
             print(f"New message received from {msg.phone}: {msg.content}. User has role {role}")
-            if role == Roles.APPROVER: # It's either a new broadcast OR an approval message
+            if role == Roles.APPROVER:  # It's either a new broadcast OR an approval message
                 # See if it's an approval message
-                if msg.content.upper() in ["Y", "YES"] and awaiting_approval: #Solid approval!
+                if msg.content.upper() in ["Y", "YES"] and awaiting_approval:  # Solid approval!
                     print(f"Approval message!")
-                elif not awaiting_approval: # It's a new broadcast
+                elif not awaiting_approval:  # It's a new broadcast
                     awaiting_approval = True
                     content = approval_template.format(msg.content)
                     for number in config_data["approvers"].keys():
                         if number == msg.phone:
                             continue
                         messasging_service.send_message(number, content)
-
-
 
 
 if __name__ == "__main__":
