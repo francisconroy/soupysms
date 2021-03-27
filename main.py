@@ -1,4 +1,5 @@
 import json
+import re
 from ipaddress import IPv4Address
 from pyairmore.request import AirmoreSession  # import session
 from pyairmore.services.device import DeviceService
@@ -11,6 +12,9 @@ class Roles(Enum):
     APPROVER=2
     UNREGISTERED=3
     UNDEFINED=4
+
+approval_template = "SMS BROADCAST REQUESTED, return Y/yes to authorise transmission. \
+The message contents follow the colon:{}"
 
 
 def get_number_role(num_string, json_data):
@@ -67,6 +71,7 @@ def run(config_file_path, gw_handset_ip):
     print(f"Latest message was at {current_head_timestamp}")
 
     run = True
+    awaiting_approval = False
     while(run):
         # Keep checking for new SMSes
         all_messages = messasging_service.fetch_message_history()
@@ -89,6 +94,18 @@ def run(config_file_path, gw_handset_ip):
             # process the new message by checking if the sender is already in one of the lists
             role = get_number_role(msg.phone, config_data)
             print(f"New message received from {msg.phone}: {msg.content}. User has role {role}")
+            if role == Roles.APPROVER: # It's either a new broadcast OR an approval message
+                # See if it's an approval message
+                if msg.content.upper() in ["Y", "YES"] and awaiting_approval: #Solid approval!
+                    print(f"Approval message!")
+                elif not awaiting_approval: # It's a new broadcast
+                    awaiting_approval = True
+                    content = approval_template.format(msg.content)
+                    for number in config_data["approvers"].keys():
+                        if number == msg.phone:
+                            continue
+                        messasging_service.send_message(number, content)
+
 
 
 
