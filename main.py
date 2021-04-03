@@ -72,6 +72,8 @@ def run(config_file_path, gw_handset_ip):
 
     run = True
     awaiting_approval = False
+    approvals = set()
+    queued_broadcast = None
     while (run):
         # Keep checking for new SMSes
         all_messages = messasging_service.fetch_message_history()
@@ -98,6 +100,20 @@ def run(config_file_path, gw_handset_ip):
                 # See if it's an approval message
                 if msg.content.upper() in ["Y", "YES"] and awaiting_approval:  # Solid approval!
                     print(f"Approval message!")
+                    approvals.add(msg.phone)
+                    if len(approvals) >= config_data["general"]["required_authorisations"]:
+                        # Enough approvals received
+                        # Send out all of the messages!
+                        sent_messages = 0
+                        for number in list(config_data["approvers"].keys())+list(config_data["users"].keys()):
+                            messasging_service.send_message(number, queued_broadcast)
+                            sent_messages += 1
+                        print(f"{sent_messages} messages sent")
+
+                        # Reset stuff
+                        awaiting_approval = False
+                        queued_broadcast = None
+                        approvals = set()  # Reset the approvals
                 elif not awaiting_approval:  # It's a new broadcast
                     awaiting_approval = True
                     content = approval_template.format(msg.content)
@@ -105,6 +121,7 @@ def run(config_file_path, gw_handset_ip):
                         if number == msg.phone:
                             continue
                         messasging_service.send_message(number, content)
+                    queued_broadcast = msg.content
 
 
 if __name__ == "__main__":
