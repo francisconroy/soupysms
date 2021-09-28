@@ -91,6 +91,8 @@ def run(config_file_path, gw_handset_ip):
         if len(new_messages):
             current_head_timestamp = new_messages[0].datetime
 
+        # TODO Add timeout on approval of queued message
+
         # Process the new_messages
         for msg in new_messages:
             # process the new message by checking if the sender is already in one of the lists
