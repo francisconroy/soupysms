@@ -1,5 +1,4 @@
 import json
-import re
 from ipaddress import IPv4Address
 from pyairmore.request import AirmoreSession  # import session
 from pyairmore.services.device import DeviceService
@@ -107,7 +106,7 @@ def run(config_file_path, gw_handset_ip):
                         # Enough approvals received
                         # Send out all of the messages!
                         sent_messages = 0
-                        for number in list(config_data["approvers"].keys())+list(config_data["users"].keys()):
+                        for number in list(config_data["approvers"].keys()) + list(config_data["users"].keys()):
                             messasging_service.send_message(number, queued_broadcast)
                             sent_messages += 1
                         print(f"{sent_messages} messages sent")
