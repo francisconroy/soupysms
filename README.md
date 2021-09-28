@@ -35,7 +35,7 @@ This is a test SMS to be broadcast to everyone
 ```
 
 ### Configuration
-PLease edit the configuration.json file as needed for your application.
+Please edit the configuration.json file as needed for your application.
 Sample phone numbers are from https://fakenumber.org/australia/mobile
 
 #### Fields
