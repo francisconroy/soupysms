@@ -1,0 +1,13 @@
+{
+  "general": {
+    "required_authorisations": 3,
+    "note": "Please adjust this number to suit your organisation, it should be proportional to the number of registered approvers"
+  },
+  "users": {
+    "+61491570156": null
+  },
+  "approvers":
+  {
+    "+61491570158": {"name":  "bob simmons"}
+  }
+}
